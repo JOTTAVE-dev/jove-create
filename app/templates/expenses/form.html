@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="page-header">
+  <div>
+    <span class="eyebrow">Despesa</span>
+    <h1>{{ title }}</h1>
+    <p>Despesas operacionais ficam separadas de compras de estoque e investimentos.</p>
+  </div>
+</section>
+
+<section class="panel">
+  {% if error %}<div class="alert alert-danger">{{ error }}</div>{% endif %}
+  <form class="form-grid" method="post" action="{{ action }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <label class="field-wide">Descricao<input type="text" name="description" value="{{ expense.description if expense else '' }}" required></label>
+    <label>
+      Categoria
+      <input type="text" name="category_name" list="expense-categories" value="{{ expense.category.name if expense else '' }}" required>
+      <datalist id="expense-categories">
+        {% for category in categories %}
+        <option value="{{ category.name }}"></option>
+        {% endfor %}
+      </datalist>
+    </label>
+    <label>Valor<input type="text" name="amount" inputmode="decimal" value="{{ expense.amount if expense else '' }}" required></label>
+    <label>Data<input type="date" name="expense_date" value="{{ expense.expense_date.isoformat() if expense else '' }}" required></label>
+    <label>Vencimento<input type="date" name="due_date" value="{{ expense.due_date.isoformat() if expense and expense.due_date else '' }}"></label>
+    <label>Data de pagamento<input type="date" name="paid_at" value="{{ expense.paid_at.isoformat() if expense and expense.paid_at else '' }}"></label>
+    <label>
+      Forma de pagamento
+      <select name="payment_method">
+        <option value="">A definir</option>
+        {% for method in payment_methods %}
+        <option value="{{ method.value }}" {% if expense and expense.payment_method and expense.payment_method.value == method.value %}selected{% endif %}>{{ method.value }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>
+      Status
+      <select name="status">
+        {% for status in statuses %}
+        <option value="{{ status.value }}" {% if expense and expense.status.value == status.value %}selected{% endif %}>{{ status.value }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label class="switch-row"><span>Despesa recorrente</span><input type="checkbox" name="is_recurring" {% if expense and expense.is_recurring %}checked{% endif %}></label>
+    <label>Recorrencia<input type="number" name="recurrence_months" min="1" value="{{ expense.recurrence_months if expense and expense.recurrence_months else '' }}" placeholder="Meses"></label>
+    <label class="field-wide">Observacoes<textarea name="notes" rows="4">{{ expense.notes if expense and expense.notes else '' }}</textarea></label>
+    <div class="form-actions field-wide">
+      <a class="button button-secondary" href="/expenses">Cancelar</a>
+      <button class="button button-primary" type="submit">Salvar despesa</button>
+    </div>
+  </form>
+</section>
+{% endblock %}

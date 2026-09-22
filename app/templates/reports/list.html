@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="page-header">
+  <div>
+    <span class="eyebrow">Financeiro</span>
+    <h1>Relatorios</h1>
+    <p>{{ report.report_title }} de {{ report.period.date_from.strftime("%d/%m/%Y") }} a {{ report.period.date_to.strftime("%d/%m/%Y") }}.</p>
+  </div>
+  <div class="header-actions">
+    <a class="button button-secondary" href="/reports/export.csv?report_type={{ report.report_type }}&preset={{ report.filters.preset }}&date_from={{ report.period.date_from.isoformat() }}&date_to={{ report.period.date_to.isoformat() }}{% if report.filters.category_id %}&category_id={{ report.filters.category_id }}{% endif %}{% if report.filters.channel %}&channel={{ report.filters.channel }}{% endif %}">Exportar CSV</a>
+  </div>
+</section>
+
+<section class="panel dashboard-filters">
+  <form method="get" class="report-filter-grid">
+    <label>
+      Relatorio
+      <select name="report_type">
+        {% for key, label in report.report_types.items() %}
+        <option value="{{ key }}" {% if report.report_type == key %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>
+      Periodo
+      <select name="preset">
+        <option value="today" {% if report.period.preset == "today" %}selected{% endif %}>Hoje</option>
+        <option value="last_7_days" {% if report.period.preset == "last_7_days" %}selected{% endif %}>Ultimos 7 dias</option>
+        <option value="current_month" {% if report.period.preset == "current_month" %}selected{% endif %}>Mes atual</option>
+        <option value="previous_month" {% if report.period.preset == "previous_month" %}selected{% endif %}>Mes anterior</option>
+        <option value="current_year" {% if report.period.preset == "current_year" %}selected{% endif %}>Ano atual</option>
+        <option value="custom" {% if report.period.preset == "custom" %}selected{% endif %}>Periodo personalizado</option>
+      </select>
+    </label>
+    <label>
+      De
+      <input type="date" name="date_from" value="{{ report.period.date_from.isoformat() }}">
+    </label>
+    <label>
+      Ate
+      <input type="date" name="date_to" value="{{ report.period.date_to.isoformat() }}">
+    </label>
+    <label>
+      Categoria
+      <select name="category_id">
+        <option value="">Todas</option>
+        {% for category in report.categories %}
+        <option value="{{ category.id }}" {% if report.filters.category_id == category.id %}selected{% endif %}>{{ category.name }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>
+      Canal
+      <select name="channel">
+        <option value="">Todos</option>
+        {% for channel in report.channels %}
+        <option value="{{ channel.value }}" {% if report.filters.channel == channel.value %}selected{% endif %}>{{ channel.value }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <button class="button button-primary" type="submit">Aplicar</button>
+  </form>
+</section>
+
+<section class="metric-grid dashboard-metrics">
+  {% for item in report.summary %}
+  <article class="metric-card">
+    <span>{{ item.label }}</span>
+    <strong>{{ item.value }}</strong>
+    <small>Mesmo motor financeiro do dashboard</small>
+  </article>
+  {% endfor %}
+</section>
+
+<section class="content-grid">
+  <article class="panel">
+    <div class="panel-header">
+      <div>
+        <span class="eyebrow">Grafico</span>
+        <h2>{{ report.report_title }}</h2>
+      </div>
+    </div>
+    {% if report.chart %}
+    <div class="chart-bars">
+      {% for row in report.chart %}
+      <div class="chart-row">
+        <div>
+          <strong>{{ row.label }}</strong>
+          <span>{{ row.formatted }}</span>
+        </div>
+        <i style="--size: {{ row.percent }}%"></i>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="empty-state">Sem dados para os filtros selecionados.</p>
+    {% endif %}
+  </article>
+
+  <article class="panel">
+    <div class="panel-header">
+      <div>
+        <span class="eyebrow">Exportacoes futuras</span>
+        <h2>Preparado</h2>
+      </div>
+    </div>
+    <div class="list-stack">
+      <div class="list-item"><span>CSV disponivel agora.</span></div>
+      {% for item in report.future_export_formats %}
+      <div class="list-item"><span>{{ item }} planejado para etapa futura.</span></div>
+      {% endfor %}
+    </div>
+  </article>
+</section>
+
+<section class="panel">
+  <div class="panel-header">
+    <div>
+      <span class="eyebrow">Tabela</span>
+      <h2>Dados do relatorio</h2>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          {% for key, label in report.columns %}
+          <th>{{ label }}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in report.rows %}
+        <tr>
+          {% for key, label in report.columns %}
+          <td>
+            {% if row[key].as_tuple is defined %}
+              {{ format_brl(row[key]) }}
+            {% else %}
+              {{ row[key] }}
+            {% endif %}
+          </td>
+          {% endfor %}
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="{{ report.columns|length }}">Nenhum registro encontrado.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

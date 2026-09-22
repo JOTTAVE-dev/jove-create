@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="page-header">
+  <div>
+    <span class="eyebrow">Investimentos</span>
+    <h1>Ferramentas e equipamentos</h1>
+    <p>Controle equipamentos duraveis, consumiveis, manutencoes e total investido.</p>
+  </div>
+  <div class="header-actions">
+    <a class="button button-primary" href="/equipments/new">Novo equipamento</a>
+  </div>
+</section>
+
+<section class="metric-grid">
+  <article class="metric-card positive">
+    <span>Total investido</span>
+    <strong>{{ format_brl(total_invested) }}</strong>
+    <small>Nao entra automaticamente como custo mensal</small>
+  </article>
+</section>
+
+<section class="panel">
+  <form class="search-form" method="get" action="/equipments">
+    <label>
+      Categoria
+      <select name="category">
+        <option value="">Todas</option>
+        {% for category in categories %}
+        <option value="{{ category }}" {% if filters.category == category %}selected{% endif %}>{{ category }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label class="switch-row inline-switch">
+      <span>Incluir inativos</span>
+      <input type="checkbox" name="include_inactive" value="true" {% if filters.include_inactive %}checked{% endif %}>
+    </label>
+    <button class="button button-secondary" type="submit">Filtrar</button>
+  </form>
+</section>
+
+<section class="product-grid">
+  {% for equipment in equipments %}
+  <article class="product-card">
+    <div class="product-image"><span>EQ</span></div>
+    <div class="product-body">
+      <div>
+        <span class="badge">{{ equipment.category }}</span>
+        <span class="badge">{{ equipment.kind }}</span>
+      </div>
+      <h2>{{ equipment.name }}</h2>
+      <p>{{ equipment.manufacturer or "Fabricante nao informado" }} · {{ equipment.model or "Modelo nao informado" }}</p>
+      <dl class="product-facts">
+        <div>
+          <dt>Valor</dt>
+          <dd>{{ format_brl(equipment.purchase_cost) }}</dd>
+        </div>
+        <div>
+          <dt>Manutencoes</dt>
+          <dd>{{ format_brl(maintenance_total(equipment)) }}</dd>
+        </div>
+      </dl>
+      <div class="card-actions">
+        <a class="button button-compact" href="/equipments/{{ equipment.id }}">Consultar</a>
+        <a class="button button-secondary button-compact" href="/equipments/{{ equipment.id }}/edit">Editar</a>
+      </div>
+    </div>
+  </article>
+  {% else %}
+  <article class="panel">
+    <h2>Nenhum equipamento cadastrado</h2>
+    <p>Cadastre impressoras, ferramentas, acessorios ou pecas de reposicao.</p>
+  </article>
+  {% endfor %}
+</section>
+{% endblock %}

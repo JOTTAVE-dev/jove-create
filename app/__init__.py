@@ -1,0 +1,1 @@
+"""JOVE Manager application package."""

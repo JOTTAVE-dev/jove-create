@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="page-header">
+  <div>
+    <span class="eyebrow">Catalogo</span>
+    <h1>Produtos</h1>
+    <p>Cadastre e consulte produtos impressos em 3D, personalizados ou com preco sob consulta.</p>
+  </div>
+  <div class="header-actions">
+    <a class="button button-primary" href="/products/new">Novo produto</a>
+  </div>
+</section>
+
+<section class="panel">
+  <form class="search-form" method="get" action="/products">
+    <label>
+      Pesquisar
+      <input type="search" name="q" value="{{ q }}" placeholder="Nome, categoria ou descricao">
+    </label>
+    <label class="switch-row inline-switch">
+      <span>Incluir inativos</span>
+      <input type="checkbox" name="include_inactive" value="true" {% if include_inactive %}checked{% endif %}>
+    </label>
+    <button class="button button-secondary" type="submit">Buscar</button>
+  </form>
+</section>
+
+<section class="product-grid" aria-label="Lista de produtos">
+  {% for product in products %}
+  <article class="product-card">
+    <div class="product-image">
+      {% if product.image_url %}
+      <img src="{{ product.image_url }}" alt="{{ product.name }}">
+      {% else %}
+      <span>3D</span>
+      {% endif %}
+    </div>
+    <div class="product-body">
+      <div>
+        <span class="badge">{{ product.category or "Sem categoria" }}</span>
+        {% if not product.is_active %}
+        <span class="badge badge-danger">Inativo</span>
+        {% endif %}
+      </div>
+      <h2>{{ product.name }}</h2>
+      <p>{{ product.description or "Produto preparado para configuracao detalhada nas proximas etapas." }}</p>
+      <dl class="product-facts">
+        <div>
+          <dt>Venda</dt>
+          <dd>{% if product.sale_price is not none %}{{ format_brl(product.sale_price) }}{% else %}Sob consulta{% endif %}</dd>
+        </div>
+        <div>
+          <dt>Custo estimado</dt>
+          <dd>{% if product.estimated_production_cost is not none %}{{ format_brl(product.estimated_production_cost) }}{% else %}-{% endif %}</dd>
+        </div>
+        <div>
+          <dt>Tempo</dt>
+          <dd>{% if product.estimated_print_time_minutes is not none %}{{ product.estimated_print_time_minutes }} min{% else %}-{% endif %}</dd>
+        </div>
+        <div>
+          <dt>Peso</dt>
+          <dd>{% if product.estimated_weight_grams is not none %}{{ product.estimated_weight_grams }} g{% else %}-{% endif %}</dd>
+        </div>
+      </dl>
+      <div class="card-actions">
+        <a class="button button-secondary button-compact" href="/products/{{ product.id }}">Consultar</a>
+        <a class="button button-compact" href="/products/{{ product.id }}/edit">Editar</a>
+      </div>
+    </div>
+  </article>
+  {% else %}
+  <article class="panel">
+    <h2>Nenhum produto encontrado</h2>
+    <p>Cadastre exemplos como chaveiro personalizado, porta-retrato ou suporte para celular.</p>
+  </article>
+  {% endfor %}
+</section>
+{% endblock %}

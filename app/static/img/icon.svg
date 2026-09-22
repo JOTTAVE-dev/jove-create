@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="JOVE">
+  <rect width="256" height="256" rx="48" fill="#795548"/>
+  <path d="M64 73h128v34H99v36c0 25-14 43-40 43H44v-34h10c8 0 10-4 10-13V73Z" fill="#FFFFFF"/>
+  <path d="M118 128h74v34h-74z" fill="#388E3C"/>
+  <path d="M118 182h74v-34h-38c-20 0-36 14-36 34Z" fill="#F5EFEA"/>
+</svg>

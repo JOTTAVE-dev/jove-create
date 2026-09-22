@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="page-header">
+  <div>
+    <span class="eyebrow">Produto</span>
+    <h1>{{ product.name }}</h1>
+    <p>{{ product.category or "Sem categoria" }}</p>
+  </div>
+  <div class="header-actions">
+    <a class="button button-secondary" href="/products">Voltar</a>
+    <a class="button button-primary" href="/products/{{ product.id }}/edit">Editar</a>
+  </div>
+</section>
+
+<section class="content-grid">
+  <article class="panel">
+    <div class="product-hero">
+      {% if product.image_url %}
+      <img src="{{ product.image_url }}" alt="{{ product.name }}">
+      {% else %}
+      <span>3D</span>
+      {% endif %}
+    </div>
+    <p>{{ product.description or "Sem descricao cadastrada." }}</p>
+  </article>
+
+  <article class="panel">
+    <div class="panel-header">
+      <div>
+        <span class="eyebrow">Resumo</span>
+        <h2>Dados do produto</h2>
+      </div>
+    </div>
+    <dl class="detail-list">
+      <div>
+        <dt>Status</dt>
+        <dd>{{ "Ativo" if product.is_active else "Inativo" }}</dd>
+      </div>
+      <div>
+        <dt>Personalizavel</dt>
+        <dd>{{ "Sim" if product.is_customizable else "Nao" }}</dd>
+      </div>
+      <div>
+        <dt>Preco de venda</dt>
+        <dd>{% if product.sale_price is not none %}{{ format_brl(product.sale_price) }}{% else %}Sob consulta{% endif %}</dd>
+      </div>
+      <div>
+        <dt>Custo estimado</dt>
+        <dd>{% if product.estimated_production_cost is not none %}{{ format_brl(product.estimated_production_cost) }}{% else %}-{% endif %}</dd>
+      </div>
+      <div>
+        <dt>Tempo estimado</dt>
+        <dd>{% if product.estimated_print_time_minutes is not none %}{{ product.estimated_print_time_minutes }} min{% else %}-{% endif %}</dd>
+      </div>
+      <div>
+        <dt>Peso estimado</dt>
+        <dd>{% if product.estimated_weight_grams is not none %}{{ product.estimated_weight_grams }} g{% else %}-{% endif %}</dd>
+      </div>
+    </dl>
+
+    {% if product.is_active %}
+    <form method="post" action="/products/{{ product.id }}/deactivate">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <button class="button button-secondary button-block" type="submit">Desativar produto</button>
+    </form>
+    {% endif %}
+  </article>
+</section>
+{% endblock %}

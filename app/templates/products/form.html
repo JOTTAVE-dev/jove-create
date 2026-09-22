@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="page-header">
+  <div>
+    <span class="eyebrow">Produto</span>
+    <h1>{{ title }}</h1>
+    <p>Campos de custo e impressao ficam prontos para a futura calculadora 3D.</p>
+  </div>
+</section>
+
+<section class="panel">
+  {% if error %}
+  <div class="alert alert-danger" role="alert">{{ error }}</div>
+  {% endif %}
+
+  <form class="form-grid" method="post" action="{{ action }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+    <label class="field-wide">
+      Nome
+      <input type="text" name="name" value="{{ product.name if product else '' }}" required minlength="2" maxlength="160" placeholder="Chaveiro personalizado">
+    </label>
+
+    <label>
+      Categoria
+      <input type="text" name="category" value="{{ product.category if product and product.category else '' }}" maxlength="100" placeholder="Personalizados">
+    </label>
+
+    <label>
+      Preco de venda
+      <input type="text" name="sale_price" value="{{ product.sale_price if product and product.sale_price is not none else '' }}" inputmode="decimal" placeholder="Sob consulta">
+    </label>
+
+    <label>
+      Custo estimado
+      <input type="text" name="estimated_production_cost" value="{{ product.estimated_production_cost if product and product.estimated_production_cost is not none else '' }}" inputmode="decimal" placeholder="R$ 0,00">
+    </label>
+
+    <label>
+      Tempo estimado
+      <input type="number" name="estimated_print_time_minutes" value="{{ product.estimated_print_time_minutes if product and product.estimated_print_time_minutes is not none else '' }}" min="0" placeholder="Minutos">
+    </label>
+
+    <label>
+      Peso estimado
+      <input type="text" name="estimated_weight_grams" value="{{ product.estimated_weight_grams if product and product.estimated_weight_grams is not none else '' }}" inputmode="decimal" placeholder="Gramas">
+    </label>
+
+    <label class="field-wide">
+      Imagem
+      <input type="url" name="image_url" value="{{ product.image_url if product and product.image_url else '' }}" maxlength="500" placeholder="https://...">
+    </label>
+
+    <label class="field-wide">
+      Descricao
+      <textarea name="description" maxlength="1000" rows="4" placeholder="Detalhes do produto, variacoes e observacoes.">{{ product.description if product and product.description else '' }}</textarea>
+    </label>
+
+    <label class="switch-row">
+      <span>Permite personalizacao</span>
+      <input type="checkbox" name="is_customizable" {% if not product or product.is_customizable %}checked{% endif %}>
+    </label>
+
+    <label class="switch-row">
+      <span>Produto ativo</span>
+      <input type="checkbox" name="is_active" {% if not product or product.is_active %}checked{% endif %}>
+    </label>
+
+    <div class="form-actions field-wide">
+      <a class="button button-secondary" href="/products">Cancelar</a>
+      <button class="button button-primary" type="submit">Salvar produto</button>
+    </div>
+  </form>
+</section>
+{% endblock %}

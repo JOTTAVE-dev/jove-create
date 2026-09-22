@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="page-header">
+  <div>
+    <span class="eyebrow">Compra #{{ purchase.id }}</span>
+    <h1>{{ purchase.material }} {{ purchase.color }}</h1>
+    <p>{{ purchase.brand }} · {{ purchase.supplier }} · {{ purchase.purchase_date.strftime("%d/%m/%Y") }}</p>
+  </div>
+  <div class="header-actions">
+    <a class="button button-secondary" href="/filament-purchases">Voltar</a>
+    <a class="button button-primary" href="/filament-purchases/{{ purchase.id }}/edit">Editar</a>
+  </div>
+</section>
+
+<section class="metric-grid">
+  <article class="metric-card">
+    <span>Valor do material</span>
+    <strong>{{ format_brl(purchase.material_amount) }}</strong>
+    <small>{{ purchase.weight_grams }} g</small>
+  </article>
+  <article class="metric-card">
+    <span>Frete</span>
+    <strong>{{ format_brl(purchase.shipping_amount) }}</strong>
+    <small>Desconto: {{ format_brl(purchase.discount_amount) }}</small>
+  </article>
+  <article class="metric-card positive">
+    <span>Custo total</span>
+    <strong>{{ format_brl(purchase.total_cost) }}</strong>
+    <small>Compra de estoque</small>
+  </article>
+  <article class="metric-card positive">
+    <span>Custo por grama</span>
+    <strong>R$ {{ "%.4f"|format(purchase.cost_per_gram) }}</strong>
+    <small>Consumo sera controlado depois</small>
+  </article>
+</section>
+
+<section class="panel">
+  <div class="panel-header">
+    <div>
+      <span class="eyebrow">Historico</span>
+      <h2>Observacoes</h2>
+    </div>
+  </div>
+  <p>{{ purchase.notes or "Sem observacoes cadastradas." }}</p>
+</section>
+{% endblock %}

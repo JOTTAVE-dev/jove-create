@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="page-header">
+  <div>
+    <span class="eyebrow">Investimento</span>
+    <h1>{{ title }}</h1>
+    <p>Equipamentos ficam separados dos custos de producao do mes.</p>
+  </div>
+</section>
+
+<section class="panel">
+  {% if error %}
+  <div class="alert alert-danger" role="alert">{{ error }}</div>
+  {% endif %}
+
+  <form class="form-grid" method="post" action="{{ action }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <label class="field-wide">
+      Nome
+      <input type="text" name="name" value="{{ equipment.name if equipment else '' }}" required>
+    </label>
+    <label>
+      Categoria
+      <input type="text" name="category" value="{{ equipment.category if equipment else '' }}" required placeholder="Impressora 3D">
+    </label>
+    <label>
+      Tipo
+      <select name="kind">
+        {% for kind in kinds %}
+        <option value="{{ kind.value }}" {% if equipment and equipment.kind.value == kind.value %}selected{% endif %}>{{ kind.value }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>
+      Fabricante
+      <input type="text" name="manufacturer" value="{{ equipment.manufacturer if equipment and equipment.manufacturer else '' }}">
+    </label>
+    <label>
+      Modelo
+      <input type="text" name="model" value="{{ equipment.model if equipment and equipment.model else '' }}">
+    </label>
+    <label>
+      Data da compra
+      <input type="date" name="purchase_date" value="{{ equipment.purchase_date.isoformat() if equipment and equipment.purchase_date else '' }}">
+    </label>
+    <label>
+      Valor
+      <input type="text" name="purchase_cost" inputmode="decimal" value="{{ equipment.purchase_cost if equipment else '0' }}">
+    </label>
+    <label>
+      Fornecedor
+      <input type="text" name="supplier" value="{{ equipment.supplier if equipment and equipment.supplier else '' }}">
+    </label>
+    <label>
+      Vida util estimada
+      <input type="number" name="estimated_life_months" min="1" value="{{ equipment.estimated_life_months if equipment and equipment.estimated_life_months else '' }}" placeholder="Meses">
+    </label>
+    <label>
+      Status
+      <select name="status">
+        {% for status in statuses %}
+        <option value="{{ status.value }}" {% if equipment and equipment.status.value == status.value %}selected{% endif %}>{{ status.value }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label class="field-wide">
+      Observacoes
+      <textarea name="notes" rows="4">{{ equipment.notes if equipment and equipment.notes else '' }}</textarea>
+    </label>
+    <div class="form-actions field-wide">
+      <a class="button button-secondary" href="/equipments">Cancelar</a>
+      <button class="button button-primary" type="submit">Salvar equipamento</button>
+    </div>
+  </form>
+</section>
+{% endblock %}

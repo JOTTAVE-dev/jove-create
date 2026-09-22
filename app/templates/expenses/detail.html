@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="page-header">
+  <div>
+    <span class="eyebrow">Despesa #{{ expense.id }}</span>
+    <h1>{{ expense.description }}</h1>
+    <p>{{ expense.category.name }} · {{ expense.status }}</p>
+  </div>
+  <div class="header-actions">
+    <a class="button button-secondary" href="/expenses">Voltar</a>
+    <a class="button button-primary" href="/expenses/{{ expense.id }}/edit">Editar</a>
+  </div>
+</section>
+
+<section class="metric-grid">
+  <article class="metric-card"><span>Valor registrado</span><strong>{{ format_brl(expense.amount) }}</strong><small>{{ expense.expense_date.strftime("%d/%m/%Y") }}</small></article>
+  <article class="metric-card {% if expense.status.value == 'paid' %}positive{% endif %}"><span>Status</span><strong>{{ expense.status }}</strong><small>{% if expense.paid_at %}Pago em {{ expense.paid_at.strftime("%d/%m/%Y") }}{% else %}Vence {{ expense.due_date.strftime("%d/%m/%Y") if expense.due_date else "-" }}{% endif %}</small></article>
+  <article class="metric-card"><span>Recorrente</span><strong>{{ "Sim" if expense.is_recurring else "Nao" }}</strong><small>{{ expense.recurrence_months or "-" }} meses</small></article>
+</section>
+
+<section class="content-grid">
+  <article class="panel">
+    <p>{{ expense.notes or "Sem observacoes." }}</p>
+  </article>
+  <article class="panel">
+    <div class="panel-header"><div><span class="eyebrow">Pagamento</span><h2>Registrar pagamento</h2></div></div>
+    {% if expense.status.value != "paid" and expense.status.value != "canceled" %}
+    <form class="form-stack" method="post" action="/expenses/{{ expense.id }}/payments">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <label>Data de pagamento<input type="date" name="paid_at" required></label>
+      <label>
+        Forma
+        <select name="payment_method" required>
+          {% for method in payment_methods %}
+          <option value="{{ method.value }}">{{ method.value }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <button class="button button-primary button-block" type="submit">Registrar pagamento</button>
+    </form>
+    {% else %}
+    <div class="alert alert-info">Pagamento ja registrado ou despesa cancelada.</div>
+    {% endif %}
+  </article>
+</section>
+{% endblock %}

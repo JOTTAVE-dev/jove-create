@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% set item = sale.items[0] if sale and sale.items else none %}
+<section class="page-header">
+  <div>
+    <span class="eyebrow">Venda</span>
+    <h1>{{ title }}</h1>
+    <p>O preco e o custo sao gravados no momento da venda para preservar o historico.</p>
+  </div>
+</section>
+
+<section class="panel">
+  {% if error %}
+  <div class="alert alert-danger" role="alert">{{ error }}</div>
+  {% endif %}
+
+  <form class="form-grid" method="post" action="{{ action }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <label>
+      Data da venda
+      <input type="datetime-local" name="sale_date" value="{{ sale.sale_date.strftime('%Y-%m-%dT%H:%M') if sale else '' }}">
+    </label>
+    <label>
+      Cliente
+      <input type="text" name="client_name" value="{{ sale.client.name if sale else '' }}" required minlength="2">
+    </label>
+    <label>
+      Produto
+      <select name="product_id" required>
+        {% for product in products %}
+        <option value="{{ product.id }}" {% if item and item.product_id == product.id %}selected{% endif %}>{{ product.name }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>
+      Quantidade
+      <input type="text" name="quantity" inputmode="decimal" value="{{ item.quantity if item else '1' }}" required>
+    </label>
+    <label>
+      Preco unitario
+      <input type="text" name="unit_price" inputmode="decimal" value="{{ item.unit_price if item else '' }}" required>
+    </label>
+    <label>
+      Desconto
+      <input type="text" name="discount_amount" inputmode="decimal" value="{{ item.discount_amount if item else '0' }}">
+    </label>
+    <label>
+      Custo unitario
+      <input type="text" name="unit_cost" inputmode="decimal" value="{{ item.unit_cost if item else '0' }}">
+    </label>
+    <label>
+      Canal de venda
+      <select name="channel">
+        {% for channel in channels %}
+        <option value="{{ channel.value }}" {% if sale and sale.channel.value == channel.value %}selected{% endif %}>{{ channel.value }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>
+      Forma de pagamento
+      <select name="payment_method">
+        <option value="">A definir</option>
+        {% for method in payment_methods %}
+        <option value="{{ method.value }}" {% if sale and sale.payment_method and sale.payment_method.value == method.value %}selected{% endif %}>{{ method.value }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label class="field-wide">
+      Observacoes
+      <textarea name="notes" rows="4">{{ sale.notes if sale and sale.notes else '' }}</textarea>
+    </label>
+    <div class="form-actions field-wide">
+      <a class="button button-secondary" href="/sales">Cancelar</a>
+      <button class="button button-primary" type="submit">Salvar venda</button>
+    </div>
+  </form>
+</section>
+{% endblock %}

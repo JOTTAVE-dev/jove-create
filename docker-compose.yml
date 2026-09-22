@@ -1,0 +1,13 @@
+services:
+  web:
+    build: .
+    container_name: jove-manager-web
+    ports:
+      - "8000:8000"
+    environment:
+      APP_NAME: "JOVE Manager"
+      APP_TIMEZONE: "America/Fortaleza"
+      DATABASE_URL: "sqlite:///./data/jove.db"
+      SECRET_KEY: "change-this-secret-key-before-production"
+    volumes:
+      - ./data:/app/data

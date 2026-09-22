@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="page-header">
+  <div>
+    <span class="eyebrow">Filamento</span>
+    <h1>{{ title }}</h1>
+    <p>O custo por grama e calculado automaticamente e preservado no historico.</p>
+  </div>
+</section>
+
+<section class="panel">
+  {% if error %}
+  <div class="alert alert-danger" role="alert">{{ error }}</div>
+  {% endif %}
+
+  <form class="form-grid" method="post" action="{{ action }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <label>
+      Marca
+      <input type="text" name="brand" value="{{ purchase.brand if purchase else '' }}" required>
+    </label>
+    <label>
+      Material
+      <select name="material" required>
+        {% for material in materials %}
+        <option value="{{ material.value }}" {% if purchase and purchase.material.value == material.value %}selected{% endif %}>{{ material.value }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>
+      Cor
+      <input type="text" name="color" value="{{ purchase.color if purchase else '' }}" required>
+    </label>
+    <label>
+      Peso adquirido (g)
+      <input type="text" name="weight_grams" inputmode="decimal" value="{{ purchase.weight_grams if purchase else '' }}" required>
+    </label>
+    <label>
+      Valor do material
+      <input type="text" name="material_amount" inputmode="decimal" value="{{ purchase.material_amount if purchase else '' }}" required>
+    </label>
+    <label>
+      Frete
+      <input type="text" name="shipping_amount" inputmode="decimal" value="{{ purchase.shipping_amount if purchase else '0' }}">
+    </label>
+    <label>
+      Descontos
+      <input type="text" name="discount_amount" inputmode="decimal" value="{{ purchase.discount_amount if purchase else '0' }}">
+    </label>
+    <label>
+      Fornecedor
+      <input type="text" name="supplier" value="{{ purchase.supplier if purchase else '' }}" required>
+    </label>
+    <label>
+      Data da compra
+      <input type="date" name="purchase_date" value="{{ purchase.purchase_date.isoformat() if purchase else '' }}" required>
+    </label>
+    <label class="field-wide">
+      Observacoes
+      <textarea name="notes" rows="4">{{ purchase.notes if purchase and purchase.notes else '' }}</textarea>
+    </label>
+    <div class="form-actions field-wide">
+      <a class="button button-secondary" href="/filament-purchases">Cancelar</a>
+      <button class="button button-primary" type="submit">Salvar compra</button>
+    </div>
+  </form>
+</section>
+{% endblock %}

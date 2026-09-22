@@ -1,0 +1,17 @@
+{
+  "name": "JOVE Manager",
+  "short_name": "JOVE",
+  "description": "Gestao financeira e comercial da JOVE CREATE.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F5EFEA",
+  "theme_color": "#795548",
+  "icons": [
+    {
+      "src": "/static/images/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

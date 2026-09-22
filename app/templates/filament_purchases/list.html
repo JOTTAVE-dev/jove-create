@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="page-header">
+  <div>
+    <span class="eyebrow">Estoque</span>
+    <h1>Compras de filamentos</h1>
+    <p>Registre custos de materiais sem misturar compra de estoque com consumo em producao.</p>
+  </div>
+  <div class="header-actions">
+    <a class="button button-primary" href="/filament-purchases/new">Nova compra</a>
+  </div>
+</section>
+
+<section class="panel">
+  <form class="search-form" method="get" action="/filament-purchases">
+    <label>
+      De
+      <input type="date" name="date_from" value="{{ filters.date_from }}">
+    </label>
+    <label>
+      Ate
+      <input type="date" name="date_to" value="{{ filters.date_to }}">
+    </label>
+    <label>
+      Material
+      <select name="material">
+        <option value="">Todos</option>
+        {% for material in materials %}
+        <option value="{{ material.value }}" {% if filters.material == material.value %}selected{% endif %}>{{ material.value }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>
+      Fornecedor
+      <input type="search" name="supplier" value="{{ filters.supplier }}" placeholder="Fornecedor">
+    </label>
+    <button class="button button-secondary" type="submit">Filtrar</button>
+  </form>
+</section>
+
+<section class="panel">
+  <div class="panel-header">
+    <div>
+      <span class="eyebrow">Grafico</span>
+      <h2>Compras por mes</h2>
+    </div>
+  </div>
+  <div class="report-bars">
+    {% for row in chart %}
+    <span style="--size: {{ row.percent }}%"><b>{{ row.month }} · {{ format_brl(row.total) }}</b></span>
+    {% else %}
+    <p>Nenhuma compra registrada para gerar grafico.</p>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="panel">
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Data</th>
+          <th>Filamento</th>
+          <th>Peso</th>
+          <th>Total</th>
+          <th>R$/g</th>
+          <th>Fornecedor</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for purchase in purchases %}
+        <tr>
+          <td>{{ purchase.purchase_date.strftime("%d/%m/%Y") }}</td>
+          <td>{{ purchase.material }} {{ purchase.color }} · {{ purchase.brand }}</td>
+          <td>{{ purchase.weight_grams }} g</td>
+          <td>{{ format_brl(purchase.total_cost) }}</td>
+          <td>R$ {{ "%.4f"|format(purchase.cost_per_gram) }}</td>
+          <td>{{ purchase.supplier }}</td>
+          <td><a class="button button-compact" href="/filament-purchases/{{ purchase.id }}">Abrir</a></td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="7">Nenhuma compra de filamento registrada.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

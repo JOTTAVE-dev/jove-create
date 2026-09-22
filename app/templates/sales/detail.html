@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="page-header">
+  <div>
+    <span class="eyebrow">Venda #{{ sale.id }}</span>
+    <h1>{{ sale.client.name }}</h1>
+    <p>{{ sale.sale_date.strftime("%d/%m/%Y %H:%M") }} · {{ sale.channel }}</p>
+  </div>
+  <div class="header-actions">
+    <a class="button button-secondary" href="/sales">Voltar</a>
+    {% if sale.status.value != "canceled" %}
+    <a class="button button-primary" href="/sales/{{ sale.id }}/edit">Editar</a>
+    {% endif %}
+  </div>
+</section>
+
+<section class="metric-grid">
+  <article class="metric-card">
+    <span>Valor vendido</span>
+    <strong>{{ format_brl(sale.total_amount) }}</strong>
+    <small>Desconto: {{ format_brl(sale.discount_amount) }}</small>
+  </article>
+  <article class="metric-card positive">
+    <span>Valor recebido</span>
+    <strong>{{ format_brl(sale.amount_paid) }}</strong>
+    <small>{{ sale.payment_status }}</small>
+  </article>
+  <article class="metric-card">
+    <span>Custo total</span>
+    <strong>{{ format_brl(sale.total_cost) }}</strong>
+    <small>Historico preservado</small>
+  </article>
+  <article class="metric-card positive">
+    <span>Lucro bruto estimado</span>
+    <strong>{{ format_brl(sale.gross_profit) }}</strong>
+    <small>Antes de despesas</small>
+  </article>
+</section>
+
+<section class="content-grid">
+  <article class="panel">
+    <div class="panel-header">
+      <div>
+        <span class="eyebrow">Itens</span>
+        <h2>Produtos vendidos</h2>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Produto</th>
+            <th>Qtd.</th>
+            <th>Preco</th>
+            <th>Total</th>
+            <th>Custo</th>
+            <th>Lucro</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in sale.items %}
+          <tr>
+            <td>{{ item.product_name }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>{{ format_brl(item.unit_price) }}</td>
+            <td>{{ format_brl(item.total_amount) }}</td>
+            <td>{{ format_brl(item.total_cost) }}</td>
+            <td>{{ format_brl(item.gross_profit) }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </article>
+
+  <article class="panel">
+    <div class="panel-header">
+      <div>
+        <span class="eyebrow">Pagamento</span>
+        <h2>Registrar recebimento</h2>
+      </div>
+    </div>
+    {% if sale.status.value != "canceled" %}
+    <form class="form-stack" method="post" action="/sales/{{ sale.id }}/payments">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <label>
+        Valor recebido
+        <input type="text" name="amount" inputmode="decimal" required>
+      </label>
+      <label>
+        Forma
+        <select name="payment_method" required>
+          {% for method in payment_methods %}
+          <option value="{{ method.value }}">{{ method.value }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>
+        Observacoes
+        <input type="text" name="notes">
+      </label>
+      <button class="button button-primary button-block" type="submit">Registrar pagamento</button>
+    </form>
+    <form method="post" action="/sales/{{ sale.id }}/cancel" class="form-stack">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <button class="button button-secondary button-block" type="submit">Cancelar venda</button>
+    </form>
+    {% else %}
+    <div class="alert alert-danger">Venda cancelada.</div>
+    {% endif %}
+  </article>
+</section>
+{% endblock %}

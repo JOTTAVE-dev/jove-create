@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+
+{% macro bar_chart(title, subtitle, rows) %}
+<article class="panel">
+  <div class="panel-header">
+    <div>
+      <span class="eyebrow">Indicador</span>
+      <h2>{{ title }}</h2>
+      <p>{{ subtitle }}</p>
+    </div>
+  </div>
+  {% if rows %}
+  <div class="chart-bars" aria-label="{{ title }}">
+    {% for row in rows %}
+    <div class="chart-row">
+      <div>
+        <strong>{{ row.label }}</strong>
+        <span>{{ row.formatted }}</span>
+      </div>
+      <i style="--size: {{ row.percent }}%"></i>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="empty-state">Sem dados reais para o periodo selecionado.</p>
+  {% endif %}
+</article>
+{% endmacro %}
+
+{% block content %}
+<section class="page-header" id="dashboard">
+  <div>
+    <span class="eyebrow">JOVE CREATE</span>
+    <h1>Dashboard financeiro</h1>
+    <p>Visao consolidada de {{ dashboard.period.date_from.strftime("%d/%m/%Y") }} a {{ dashboard.period.date_to.strftime("%d/%m/%Y") }}.</p>
+  </div>
+  <div class="header-actions">
+    <a class="button button-secondary" href="/sales">Vendas</a>
+    <a class="button button-primary" href="/sales/new">Nova venda</a>
+  </div>
+</section>
+
+<section class="panel dashboard-filters" aria-label="Filtros do dashboard">
+  <form method="get" class="filter-grid">
+    <label>
+      Periodo
+      <select name="preset">
+        <option value="today" {% if selected_preset == "today" %}selected{% endif %}>Hoje</option>
+        <option value="last_7_days" {% if selected_preset == "last_7_days" %}selected{% endif %}>Ultimos 7 dias</option>
+        <option value="current_month" {% if selected_preset == "current_month" %}selected{% endif %}>Mes atual</option>
+        <option value="previous_month" {% if selected_preset == "previous_month" %}selected{% endif %}>Mes anterior</option>
+        <option value="current_year" {% if selected_preset == "current_year" %}selected{% endif %}>Ano atual</option>
+        <option value="custom" {% if selected_preset == "custom" %}selected{% endif %}>Periodo personalizado</option>
+      </select>
+    </label>
+    <label>
+      De
+      <input type="date" name="date_from" value="{{ dashboard.period.date_from.isoformat() }}">
+    </label>
+    <label>
+      Ate
+      <input type="date" name="date_to" value="{{ dashboard.period.date_to.isoformat() }}">
+    </label>
+    <button class="button button-primary" type="submit">Aplicar</button>
+  </form>
+</section>
+
+<section class="alert alert-info" role="status">
+  <strong>Dados reais do banco.</strong>
+  Faturamento, recebimentos, estoque, despesas operacionais e investimentos sao calculados separadamente.
+</section>
+
+<section class="metric-grid dashboard-metrics" aria-label="Indicadores financeiros">
+  {% for metric in dashboard.metrics %}
+  <article class="metric-card {{ metric.tone }}">
+    <span>{{ metric.label }}</span>
+    <strong>{{ metric.value }}</strong>
+    <small>{{ metric.detail }}</small>
+  </article>
+  {% endfor %}
+</section>
+
+<section class="content-grid dashboard-chart-grid">
+  {{ bar_chart("Faturamento por mes", "Vendas nao canceladas por data da venda.", dashboard.charts.revenue_by_month) }}
+  {{ bar_chart("Evolucao do lucro", "Lucro bruto por data da venda.", dashboard.charts.profit_by_month) }}
+</section>
+
+<section class="content-grid dashboard-chart-grid">
+  {{ bar_chart("Despesas por categoria", "Somente despesas operacionais.", dashboard.charts.expenses_by_category) }}
+  {{ bar_chart("Vendas por canal", "Faturamento separado por origem da venda.", dashboard.charts.sales_by_channel) }}
+</section>
+
+<section class="content-grid dashboard-chart-grid">
+  {{ bar_chart("Compras de materiais", "Filamentos comprados para estoque.", dashboard.charts.purchases_by_material) }}
+  <article class="panel">
+    <div class="panel-header">
+      <div>
+        <span class="eyebrow">Acompanhamento</span>
+        <h2>Leituras recentes</h2>
+        <p>Movimentos do periodo selecionado.</p>
+      </div>
+    </div>
+    <div class="list-stack">
+      {% if dashboard.recent_sales %}
+        {% for sale in dashboard.recent_sales %}
+        <a class="list-item dashboard-link" href="/sales/{{ sale.id }}">
+          <div>
+            <strong>{{ sale.client }}</strong>
+            <span>{{ sale.date }} - {{ sale.status }}</span>
+          </div>
+          <b>{{ sale.value }}</b>
+        </a>
+        {% endfor %}
+      {% else %}
+        <p class="empty-state">Nenhuma venda real neste periodo.</p>
+      {% endif %}
+    </div>
+  </article>
+</section>
+
+<section class="content-grid">
+  <article class="panel">
+    <div class="panel-header">
+      <div>
+        <span class="eyebrow">Financeiro</span>
+        <h2>Despesas em aberto</h2>
+      </div>
+      <a class="button button-compact" href="/expenses">Ver despesas</a>
+    </div>
+    <div class="list-stack">
+      {% if dashboard.open_expenses %}
+        {% for expense in dashboard.open_expenses %}
+        <a class="list-item dashboard-link" href="/expenses/{{ expense.id }}">
+          <div>
+            <strong>{{ expense.description }}</strong>
+            <span>{{ expense.category }} - {{ expense.status }}</span>
+          </div>
+          <b>{{ expense.value }}</b>
+        </a>
+        {% endfor %}
+      {% else %}
+        <p class="empty-state">Nenhuma despesa pendente no periodo.</p>
+      {% endif %}
+    </div>
+  </article>
+
+  <article class="panel" id="relatorios">
+    <div class="panel-header">
+      <div>
+        <span class="eyebrow">Regras financeiras</span>
+        <h2>Separacoes aplicadas</h2>
+      </div>
+    </div>
+    <div class="list-stack">
+      <div class="list-item"><span>Faturamento e recebimentos sao calculados em bases diferentes.</span></div>
+      <div class="list-item"><span>Compras de filamentos entram como estoque, nao como custo vendido integral.</span></div>
+      <div class="list-item"><span>Equipamentos ficam separados das despesas operacionais.</span></div>
+    </div>
+  </article>
+</section>
+
+<section class="panel" id="configuracoes">
+  <div class="panel-header">
+    <div>
+      <span class="eyebrow">Sistema</span>
+      <h2>Configuracoes</h2>
+      <p>Use os modulos laterais para manter os dados que alimentam este dashboard.</p>
+    </div>
+  </div>
+</section>
+{% endblock %}

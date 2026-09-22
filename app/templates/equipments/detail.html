@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="page-header">
+  <div>
+    <span class="eyebrow">Investimento #{{ equipment.id }}</span>
+    <h1>{{ equipment.name }}</h1>
+    <p>{{ equipment.category }} · {{ equipment.kind }}</p>
+  </div>
+  <div class="header-actions">
+    <a class="button button-secondary" href="/equipments">Voltar</a>
+    <a class="button button-primary" href="/equipments/{{ equipment.id }}/edit">Editar</a>
+  </div>
+</section>
+
+<section class="metric-grid">
+  <article class="metric-card positive">
+    <span>Valor investido</span>
+    <strong>{{ format_brl(equipment.purchase_cost) }}</strong>
+    <small>{{ equipment.purchase_date.strftime("%d/%m/%Y") if equipment.purchase_date else "Sem data" }}</small>
+  </article>
+  <article class="metric-card">
+    <span>Manutencoes</span>
+    <strong>{{ format_brl(maintenance_total(equipment)) }}</strong>
+    <small>Registro separado do investimento</small>
+  </article>
+  <article class="metric-card">
+    <span>Vida util</span>
+    <strong>{{ equipment.estimated_life_months or "-" }}</strong>
+    <small>Meses para depreciacao futura</small>
+  </article>
+</section>
+
+<section class="content-grid">
+  <article class="panel">
+    <div class="panel-header">
+      <div>
+        <span class="eyebrow">Dados</span>
+        <h2>Detalhes</h2>
+      </div>
+    </div>
+    <dl class="detail-list">
+      <div><dt>Fabricante</dt><dd>{{ equipment.manufacturer or "-" }}</dd></div>
+      <div><dt>Modelo</dt><dd>{{ equipment.model or "-" }}</dd></div>
+      <div><dt>Fornecedor</dt><dd>{{ equipment.supplier or "-" }}</dd></div>
+      <div><dt>Status</dt><dd>{{ equipment.status }}</dd></div>
+    </dl>
+    <p>{{ equipment.notes or "Sem observacoes." }}</p>
+  </article>
+
+  <article class="panel">
+    <div class="panel-header">
+      <div>
+        <span class="eyebrow">Manutencao</span>
+        <h2>Registrar manutencao</h2>
+      </div>
+    </div>
+    <form class="form-stack" method="post" action="/equipments/{{ equipment.id }}/maintenances">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <label>
+        Data
+        <input type="date" name="maintenance_date" required>
+      </label>
+      <label>
+        Descricao
+        <input type="text" name="description" required>
+      </label>
+      <label>
+        Custo
+        <input type="text" name="cost" inputmode="decimal" value="0">
+      </label>
+      <label>
+        Fornecedor
+        <input type="text" name="supplier">
+      </label>
+      <label>
+        Observacoes
+        <input type="text" name="notes">
+      </label>
+      <button class="button button-primary button-block" type="submit">Registrar manutencao</button>
+    </form>
+  </article>
+</section>
+
+<section class="panel">
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Data</th>
+          <th>Descricao</th>
+          <th>Custo</th>
+          <th>Fornecedor</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for maintenance in equipment.maintenances %}
+        <tr>
+          <td>{{ maintenance.maintenance_date.strftime("%d/%m/%Y") }}</td>
+          <td>{{ maintenance.description }}</td>
+          <td>{{ format_brl(maintenance.cost) }}</td>
+          <td>{{ maintenance.supplier or "-" }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="4">Nenhuma manutencao registrada.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}
