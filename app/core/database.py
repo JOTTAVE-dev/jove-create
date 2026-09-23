@@ -28,6 +28,12 @@ def _engine_options(database_url: str) -> dict[str, object]:
     return options
 
 
+def _sqlalchemy_database_url(database_url: str) -> str:
+    if database_url.startswith("postgresql://"):
+        return database_url.replace("postgresql://", "postgresql+psycopg://", 1)
+    return database_url
+
+
 def _ensure_sqlite_parent(database_url: str) -> None:
     if not database_url.startswith("sqlite:///"):
         return
@@ -41,7 +47,7 @@ settings = get_settings()
 _ensure_sqlite_parent(settings.database_url)
 
 engine = create_engine(
-    settings.database_url,
+    _sqlalchemy_database_url(settings.database_url),
     **_engine_options(settings.database_url),
 )
 
