@@ -46,6 +46,6 @@ def test_settings_accepts_configurable_database_url() -> None:
 
 
 def test_application_does_not_require_postgresql() -> None:
-    settings = Settings()
+    settings = Settings(_env_file=None)
 
     assert settings.database_url.startswith("sqlite")
