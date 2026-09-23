@@ -15,13 +15,14 @@ def ensure_initial_admin() -> None:
 
     with SessionLocal() as db:
         try:
-            existing_user = db.scalar(select(User.id).limit(1))
-            if existing_user is not None:
+            admin_email = normalize_email(settings.admin_email)
+            existing_admin = db.scalar(select(User).where(User.email == admin_email))
+            if existing_admin is not None:
                 return
 
             admin = User(
                 name="Administrador",
-                email=normalize_email(settings.admin_email),
+                email=admin_email,
                 password_hash=hash_password(settings.admin_password),
                 role="admin",
                 is_active=True,
